@@ -1,4 +1,18 @@
+import { useState } from 'react';
 import './App.css';
+
+const Cell = () => {
+  const [val, setVal] = useState(0);
+  return <td onClick={() => setVal(val + 1)}>{val}</td>;
+};
+
+const Row = () => (
+  <tr>
+    <Cell />
+    <Cell />
+    <Cell />
+  </tr>
+);
 
 function App() {
   return (
@@ -7,21 +21,9 @@ function App() {
         <h1>Tic tac toe</h1>
         <table>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-            </tr>
+            <Row />
+            <Row />
+            <Row />
           </tbody>
         </table>
       </header>
