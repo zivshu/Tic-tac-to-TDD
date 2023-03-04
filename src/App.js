@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.css';
+import { isBoardFull, getWinner } from "./utils";
 
 const Cell = ({ val, onCellClicked }) => <td onClick={onCellClicked}>{val}</td>;
 
@@ -31,23 +32,39 @@ const cloneBoard = (board) => board.map((row) => [...row]);
 
 function App() {
   const [currentPlayer, setCurrentPlayer] = useState("X");
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [winner, setWinner] = useState(false);
   const toggleCurrentPlayer = () =>
     currentPlayer === "X" ? setCurrentPlayer("O") : setCurrentPlayer("X");
 
   const [board, setBoard] = useState(initBoard(3));
   const onCellClicked = (rowIndex, cellIndex) => {
-    if (board[rowIndex][cellIndex] === null) {
+    if (board[rowIndex][cellIndex] === null && !winner) {
       const clonedBoard = cloneBoard(board);
       clonedBoard[rowIndex][cellIndex] = currentPlayer;
       setBoard(clonedBoard);
-      toggleCurrentPlayer();
+      const _winner = getWinner(clonedBoard);
+      if (_winner) {
+        setWinner(_winner);
+        setIsGameOver(true);
+      } else if (isBoardFull(clonedBoard)) {
+        setIsGameOver(true);
+      } else {
+        toggleCurrentPlayer();
+      }
     }
   };
+
+  const title = winner
+  ? `Winner winner chicken dinner: ${winner}`
+  : isGameOver
+  ? `Sometimes in life - it's a draw..`
+  : `Current player is: ${currentPlayer}`;
   return (
     <div className="App">
       <header className="App-header">
         <h1>Tic tac toe</h1>
-        <h2>Current player is: {currentPlayer}</h2>
+        <h2>{title}</h2>
         <table>
           <tbody>
           {board.map((cells, i) => (
