@@ -16,3 +16,13 @@ test('renders Tic Tac Toe Table', () => {
   const cells = screen.getAllByRole('cell');
   expect(cells).toHaveLength(9)
 });
+
+test('cell should render click counter', () => {
+  render(<App />);
+  const [cell] = screen.getAllByRole('cell');
+  expect(cell).toHaveTextContent(0)
+  cell.click()
+  expect(cell).toHaveTextContent(1)
+  cell.click()
+  expect(cell).toHaveTextContent(2)
+});
