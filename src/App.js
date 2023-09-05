@@ -1,54 +1,82 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import './App.css';
+import {checkWin, checkDraw, getEmptyBoard} from './utils';
+import {produce} from "immer";
 
-const Cell = ({ currentPlayer, toggleCurrentPlayer }) => {
-  const [val, setVal] = useState(null);
-  const onClickHandler = () => {
-    if (val === null) {
-      setVal(currentPlayer);
-      toggleCurrentPlayer();
-    }
-  };
+const Cell = ({content, onCellClick}) => (
+    <td onClick={onCellClick}>{content}</td>
+);
 
-  return <td onClick={onClickHandler}>{val}</td>;
-};
-
-
-  const Row = ({ currentPlayer, toggleCurrentPlayer }) => (
+const Row = ({cells, onCellClick, rowIndex}) => (
     <tr>
-      {[1, 2, 3].map((i) => (
-        <Cell
-          key={i}
-          currentPlayer={currentPlayer}
-          toggleCurrentPlayer={toggleCurrentPlayer}
-        />
-      ))}
+        {cells.map((cell, j) => (
+            <Cell
+                key={j}
+                onCellClick={() => onCellClick({i: rowIndex, j})}
+                content={cell}
+            />
+        ))}
     </tr>
-  );
+);
 
 function App() {
-  const [currentPlayer, setCurrentPlayer] = useState("X");
-  const toggleCurrentPlayer = () =>
-    currentPlayer === "X" ? setCurrentPlayer("O") : setCurrentPlayer("X");
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Tic tac toe</h1>
-        <h2>Current player is: {currentPlayer}</h2>
-        <table>
-          <tbody>
-          {[1, 2, 3].map((i) => (
-              <Row
-                key={i}
-                currentPlayer={currentPlayer}
-                toggleCurrentPlayer={toggleCurrentPlayer}
-              />
-            ))}
-          </tbody>
-        </table>
-      </header>
-    </div>
-  );
+    const [currentPlayer, setCurrentPlayer] = useState("X")
+    const [board, setBoard] = useState(getEmptyBoard())
+    const [winner, setWinner] = useState(null)
+    const [isGameOver, setIsGameOver] = useState(false)
+
+    const onCellClick = ({i, j}) => {
+        if (!!board[i][j] || isGameOver) {
+            return
+        }
+
+        const updatedBoard = produce(board, draft => {
+            draft[i][j] = currentPlayer
+        })
+
+        setBoard(updatedBoard)
+        toggleCurrentPlayer()
+
+        if (checkWin(updatedBoard)) {
+            setWinner(currentPlayer)
+            setIsGameOver(true)
+            return
+        }
+
+        if (checkDraw(updatedBoard)) {
+            setIsGameOver(true)
+        }
+    }
+
+    const toggleCurrentPlayer = () =>
+        currentPlayer === "X" ? setCurrentPlayer("O") : setCurrentPlayer("X");
+
+    const title = winner
+        ? `Winner winner chicken dinner: ${winner}`
+        : isGameOver
+            ? `Sometimes in life - it's a draw..`
+            : `Current player is: ${currentPlayer}`;
+
+    return (
+        <div className="App">
+            <header className="App-header">
+                <h1>Tic tac toe</h1>
+                <h2>{title}</h2>
+                <table>
+                    <tbody>
+                    {board.map((row, i) => (
+                        <Row
+                            key={i}
+                            onCellClick={onCellClick}
+                            cells={row}
+                            rowIndex={i}
+                        />
+                    ))}
+                    </tbody>
+                </table>
+            </header>
+        </div>
+    );
 }
 
 export default App;
